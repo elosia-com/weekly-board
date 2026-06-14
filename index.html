@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f5f4f0">
+<title>가계부</title>
+<style>
+  :root{
+    --bg:#ece9e2; --card:#ffffff; --surface:#f4f2ec; --line:rgba(0,0,0,.08);
+    --t1:#1c1c1a; --t2:#6c6b66; --t3:#a3a29c;
+    --accent:#1c1c1a; --inc:#0f8a5f;
+    --food:#D85A30; --trans:#378ADD; --shop:#7F77DD; --fixed:#888780; --joy:#1D9E75;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#16160f; --card:#23231d; --surface:#2c2c25; --line:rgba(255,255,255,.10);
+      --t1:#f2f0e8; --t2:#a8a79f; --t3:#6f6e68; --accent:#f2f0e8; --inc:#39c08c;
+    }
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--t1);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Segoe UI",Roboto,sans-serif;
+    display:flex; justify-content:center; min-height:100vh;
+  }
+  .app{width:100%; max-width:440px; background:var(--bg); min-height:100vh;}
+  .warn{display:none; margin:10px 12px 0; padding:10px 12px; border-radius:10px;
+    background:#fde8e8; color:#7a1f1f; font-size:13px; line-height:1.5;}
+  @media (prefers-color-scheme: dark){.warn{background:#3a1f1f; color:#f0b4b4;}}
+
+  .head{padding:18px 18px 14px;}
+  .month{display:flex; align-items:center; justify-content:center; gap:18px; margin-bottom:14px;}
+  .month b{font-size:16px; font-weight:600; min-width:92px; text-align:center;}
+  .navb{width:34px; height:34px; border:none; background:var(--surface); border-radius:10px;
+    font-size:18px; color:var(--t1); cursor:pointer; line-height:1;}
+  .navb:active{transform:scale(.94);}
+  .sums{display:flex; gap:10px;}
+  .sum{flex:1; background:var(--surface); border-radius:12px; padding:11px 13px;}
+  .sum .lab{font-size:12px; color:var(--t2); margin-bottom:3px;}
+  .sum .val{font-size:20px; font-weight:600;}
+  .sum.income .val{color:var(--inc);}
+  .bar{display:flex; height:9px; border-radius:999px; overflow:hidden; margin:14px 0 10px; background:var(--surface);}
+  .bar i{height:100%;}
+  .legend{display:grid; grid-template-columns:1fr 1fr; gap:5px 14px;}
+  .lg{display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--t2);}
+  .lg .dot{width:8px; height:8px; border-radius:50%; flex:0 0 auto;}
+  .lg .lv{margin-left:auto; color:var(--t1); font-variant-numeric:tabular-nums;}
+
+  .input{background:var(--card); border-top:0.5px solid var(--line); border-bottom:0.5px solid var(--line); padding:16px 18px;}
+  .toggle{display:flex; background:var(--surface); border-radius:11px; padding:3px; margin-bottom:14px;}
+  .toggle button{flex:1; height:36px; border:none; background:transparent; color:var(--t2);
+    font-size:14.5px; font-weight:600; border-radius:8px; cursor:pointer;}
+  .toggle button.on{background:var(--card); color:var(--t1); box-shadow:0 1px 2px rgba(0,0,0,.05);}
+  .amt{font-size:34px; font-weight:600; text-align:right; margin:0 0 14px; color:var(--t3);
+    font-variant-numeric:tabular-nums; min-height:42px;}
+  .amt.has{color:var(--t1);} .amt.has.inc{color:var(--inc);}
+  .cats{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:11px;}
+  .cat{flex:1 1 28%; min-width:64px; height:38px; border-radius:10px; border:1px solid var(--line);
+    background:transparent; color:var(--t1); font-size:13.5px; font-weight:500; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:6px;}
+  .cat .cdot{width:8px; height:8px; border-radius:50%;}
+  .cat.on{color:#fff; border-color:transparent;}
+  .cat.on .cdot{background:#fff!important;}
+  .memo{width:100%; height:42px; border:1px solid var(--line); background:var(--surface);
+    border-radius:10px; padding:0 13px; font-size:14.5px; color:var(--t1); margin-bottom:13px; outline:none;}
+  .memo:focus{border-color:var(--t3);}
+  .pad{display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:11px;}
+  .pad button{height:46px; border:1px solid var(--line); background:var(--card); color:var(--t1);
+    font-size:18px; font-weight:600; border-radius:11px; cursor:pointer; font-variant-numeric:tabular-nums;}
+  .pad button:active{background:var(--surface); transform:scale(.97);}
+  .save{width:100%; height:50px; border:none; border-radius:13px; background:var(--accent);
+    color:var(--bg); font-size:15.5px; font-weight:700; cursor:pointer;}
+  .save:active{transform:scale(.99); opacity:.92;}
+
+  .list{padding:6px 8px 30px;}
+  .empty{text-align:center; color:var(--t3); font-size:14px; padding:40px 0;}
+  .row{display:flex; align-items:center; gap:11px; padding:12px 10px; border-radius:11px;}
+  .row:active{background:var(--surface);}
+  .row .dot{width:10px; height:10px; border-radius:50%; flex:0 0 auto;}
+  .row .mid{flex:1; min-width:0;}
+  .row .ttl{font-size:14.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .row .sub{font-size:12px; color:var(--t3); margin-top:2px;}
+  .row .num{font-size:15.5px; font-weight:600; font-variant-numeric:tabular-nums;}
+  .row .num.inc{color:var(--inc);}
+  .row .del{width:30px; height:30px; border:none; background:transparent; color:var(--t3);
+    font-size:17px; cursor:pointer; flex:0 0 auto; opacity:0; transition:opacity .15s;}
+  .row:hover .del, .row:active .del{opacity:1;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="warn" id="warn">
+    Firebase 설정이 비어 있어요. 아래 코드의 <b>firebaseConfig</b>를 채우기 전까지는 임시(새로고침 시 사라짐)로만 저장됩니다.
+  </div>
+
+  <div class="head">
+    <div class="month">
+      <button class="navb" id="prevM" aria-label="이전 달">‹</button>
+      <b id="monthLabel">2026.06</b>
+      <button class="navb" id="nextM" aria-label="다음 달">›</button>
+    </div>
+    <div class="sums">
+      <div class="sum"><div class="lab">지출</div><div class="val" id="totalExp">₩0</div></div>
+      <div class="sum income"><div class="lab">수입</div><div class="val" id="totalInc">₩0</div></div>
+    </div>
+    <div class="bar" id="bar"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="input">
+    <div class="toggle">
+      <button id="tExp" class="on">− 지출</button>
+      <button id="tInc">＋ 수입</button>
+    </div>
+    <div class="amt" id="amt">₩0</div>
+    <div class="cats" id="cats"></div>
+    <input class="memo" id="memo" type="text" placeholder="메모 (선택)">
+    <div class="pad" id="pad"></div>
+    <button class="save" id="save">저장</button>
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+/* ▼▼▼ 여기에 본인 Firebase 웹앱 설정을 붙여넣으세요 ▼▼▼
+   (weekly-board와 같은 프로젝트를 쓸 거면, weekly-board의 firebaseConfig를 그대로 복사) */
+var firebaseConfig = {
+  apiKey: "",
+  authDomain: "",
+  databaseURL: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
+};
+/* ▲▲▲ 여기까지 ▲▲▲ */
+
+var DB_PATH = "expenses";   // weekly-board와 같은 프로젝트면 경로가 분리돼 서로 안 섞임
+
+var CATS = [
+  {key:'식비',   v:'food',  c:'#D85A30'},
+  {key:'교통',   v:'trans', c:'#378ADD'},
+  {key:'쇼핑',   v:'shop',  c:'#7F77DD'},
+  {key:'고정비', v:'fixed', c:'#888780'},
+  {key:'소확행', v:'joy',   c:'#1D9E75'}
+];
+var colorOf = {}; CATS.forEach(function(c){ colorOf[c.key]=c.c; });
+
+var entries = [];   // {id, type, cat, amt, memo, date}
+var sel = '식비', amount = 0, type = 'exp';
+var now = new Date();
+var viewY = now.getFullYear(), viewM = now.getMonth(); // 0-11
+var ref = null, localMode = false;
+
+function fmt(n){ return '₩' + Math.round(n).toLocaleString('ko-KR'); }
+function ym(y,m){ return y + '-' + String(m+1).padStart(2,'0'); }
+function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+/* ---------- Firebase ---------- */
+function initDB(){
+  if(!firebaseConfig.databaseURL){ localMode=true; document.getElementById('warn').style.display='block'; renderAll(); return; }
+  try{
+    firebase.initializeApp(firebaseConfig);
+    ref = firebase.database().ref(DB_PATH);
+    ref.on('value', function(snap){
+      var v = snap.val() || {};
+      entries = Object.keys(v).map(function(k){ var o=v[k]; o.id=k; return o; });
+      renderAll();
+    });
+  }catch(e){ localMode=true; document.getElementById('warn').style.display='block'; renderAll(); }
+}
+function addEntry(o){
+  if(localMode || !ref){ o.id='local_'+Date.now(); entries.push(o); renderAll(); return; }
+  ref.push(o);
+}
+function delEntry(id){
+  if(localMode || !ref){ entries=entries.filter(function(e){return e.id!==id;}); renderAll(); return; }
+  ref.child(id).remove();
+}
+
+/* ---------- 입력 ---------- */
+function setType(t){
+  type=t;
+  document.getElementById('tExp').className = t==='exp'?'on':'';
+  document.getElementById('tInc').className = t==='inc'?'on':'';
+  refreshAmt();
+}
+function refreshAmt(){
+  var el=document.getElementById('amt');
+  var sign = amount>0 ? (type==='inc'?'＋':'−') : '';
+  el.textContent = sign + fmt(amount);
+  el.className = 'amt' + (amount>0?' has':'') + (amount>0&&type==='inc'?' inc':'');
+}
+function renderCats(){
+  var el=document.getElementById('cats'); el.innerHTML='';
+  CATS.forEach(function(c){
+    var b=document.createElement('button');
+    var on=c.key===sel;
+    b.className='cat'+(on?' on':'');
+    if(on) b.style.background=c.c;
+    b.innerHTML='<span class="cdot" style="background:'+c.c+'"></span>'+c.key;
+    b.onclick=function(){ sel=c.key; renderCats(); };
+    el.appendChild(b);
+  });
+}
+function renderPad(){
+  var el=document.getElementById('pad'); el.innerHTML='';
+  ['1','2','3','4','5','6','7','8','9','00','0','del'].forEach(function(k){
+    var b=document.createElement('button');
+    b.textContent = k==='del'?'⌫':k;
+    b.onclick=function(){
+      if(k==='del') amount=Math.floor(amount/10);
+      else amount=Math.min(amount*(k==='00'?100:10)+(k==='00'?0:parseInt(k,10)),99999999);
+      refreshAmt();
+    };
+    el.appendChild(b);
+  });
+}
+
+/* ---------- 조회 ---------- */
+function monthEntries(){
+  var key=ym(viewY,viewM);
+  return entries.filter(function(e){ return (e.date||'').slice(0,7)===key; });
+}
+function renderSummary(){
+  document.getElementById('monthLabel').textContent = viewY+'.'+String(viewM+1).padStart(2,'0');
+  var list=monthEntries(), sums={}, tExp=0, tInc=0;
+  CATS.forEach(function(c){ sums[c.key]=0; });
+  list.forEach(function(e){
+    if(e.type==='inc') tInc+=e.amt;
+    else { tExp+=e.amt; if(sums[e.cat]!=null) sums[e.cat]+=e.amt; }
+  });
+  document.getElementById('totalExp').textContent=fmt(tExp);
+  document.getElementById('totalInc').textContent=fmt(tInc);
+  var bar=document.getElementById('bar'); bar.innerHTML='';
+  var leg=document.getElementById('legend'); leg.innerHTML='';
+  CATS.forEach(function(c){
+    var v=sums[c.key]; if(v<=0) return;
+    var seg=document.createElement('i'); seg.style.background=c.c; seg.style.width=(tExp?v/tExp*100:0)+'%'; bar.appendChild(seg);
+    var d=document.createElement('div'); d.className='lg';
+    d.innerHTML='<span class="dot" style="background:'+c.c+'"></span>'+c.key+'<span class="lv">'+fmt(v)+'</span>';
+    leg.appendChild(d);
+  });
+}
+function renderList(){
+  var el=document.getElementById('list');
+  var list=monthEntries().sort(function(a,b){ return (b.date+(b.id||'')).localeCompare(a.date+(a.id||'')); });
+  if(!list.length){ el.innerHTML='<div class="empty">이 달 기록이 없어요</div>'; return; }
+  el.innerHTML='';
+  list.forEach(function(e){
+    var inc=e.type==='inc';
+    var dot=inc?'var(--inc)':colorOf[e.cat];
+    var ttl=e.memo&&e.memo.trim()?e.memo:(inc?'수입':e.cat);
+    var dd=(e.date||'').slice(8)||'';
+    var sub=(inc?'수입':e.cat)+(dd?' · '+(viewM+1)+'.'+parseInt(dd,10):'');
+    var row=document.createElement('div'); row.className='row';
+    row.innerHTML='<span class="dot" style="background:'+dot+'"></span>'+
+      '<div class="mid"><div class="ttl">'+esc(ttl)+'</div><div class="sub">'+sub+'</div></div>'+
+      '<span class="num'+(inc?' inc':'')+'">'+(inc?'＋':'−')+fmt(e.amt)+'</span>'+
+      '<button class="del" aria-label="삭제">⌫</button>';
+    row.querySelector('.del').onclick=function(ev){ ev.stopPropagation(); if(confirm('삭제할까요?')) delEntry(e.id); };
+    el.appendChild(row);
+  });
+}
+function esc(s){ return (s||'').replace(/[&<>"]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];}); }
+function renderAll(){ renderSummary(); renderList(); }
+
+/* ---------- 이벤트 ---------- */
+document.getElementById('tExp').onclick=function(){ setType('exp'); };
+document.getElementById('tInc').onclick=function(){ setType('inc'); };
+document.getElementById('prevM').onclick=function(){ viewM--; if(viewM<0){viewM=11;viewY--;} renderAll(); };
+document.getElementById('nextM').onclick=function(){ viewM++; if(viewM>11){viewM=0;viewY++;} renderAll(); };
+document.getElementById('save').onclick=function(){
+  if(amount<=0) return;
+  var d=new Date();
+  addEntry({ type:type, cat:sel, amt:amount, memo:document.getElementById('memo').value||'', date:todayStr() });
+  viewY=d.getFullYear(); viewM=d.getMonth();          // 저장 후 이번 달로 이동
+  amount=0; document.getElementById('memo').value=''; refreshAmt();
+  if(localMode) renderAll();
+};
+
+renderCats(); renderPad(); setType('exp'); initDB();
+</script>
+</body>
+</html>
