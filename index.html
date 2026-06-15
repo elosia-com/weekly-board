@@ -126,7 +126,8 @@
   .label-note.has-note { color: var(--text-primary); }
 
   /* 제작 행 셀 */
-  .check-cell { border-left: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px 3px 4px; }
+  .check-cell { border-left: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px 3px 4px; position: relative; }
+  .memo-input, .sns-memo-input { position: relative; z-index: 2; }
   .check-cell.last { border-bottom: none; }
   .check-cell.today-col { background: rgba(23,93,185,0.03); }
 
