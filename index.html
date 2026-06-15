@@ -333,8 +333,8 @@ onValue(dbRef,(snapshot)=>{
   setSyncStatus(true);
   if(snapshot.exists()){state=snapshot.val();}
   else{set(dbRef,DEFAULT_STATE);state=JSON.parse(JSON.stringify(DEFAULT_STATE));}
-  render();
-},()=>{setSyncStatus(false);render();});
+  if(document.getElementById('app').classList.contains('visible')){render();}
+},()=>{setSyncStatus(false);});
 
 document.getElementById('btn-view').addEventListener('click',()=>{isEditMode=false;showApp();});
 document.getElementById('btn-edit').addEventListener('click',()=>{
