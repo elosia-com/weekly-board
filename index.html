@@ -120,7 +120,6 @@
     overflow-wrap: break-word;
   }
   .label-note::placeholder { color: var(--text-tertiary); font-size: 10px; }
-  .label-note:not(.editable) { pointer-events: none; }
   .label-note.editable { cursor: text; }
   .label-note.editable:focus { background: var(--bg-secondary); border-radius: 2px; }
   .label-note.has-note { color: var(--text-primary); }
@@ -176,13 +175,11 @@
   .sns-memo-icon { width: 14px; height: 14px; border-radius: 3px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 9px; }
   .sns-memo-input { flex: 1; font-size: 11px; color: var(--text-secondary); border: none; border-bottom: 0.5px solid var(--border); background: transparent; outline: none; padding: 1px 2px; font-family: inherit; min-width: 0; }
   .sns-memo-input::placeholder { color: var(--text-tertiary); font-size: 10px; }
-  .sns-memo-input:not(.editable) { pointer-events: none; }
   .sns-memo-input.editable { cursor: text; }
   .sns-memo-input.editable:focus { background: var(--bg-secondary); border-radius: 2px; }
   .sns-memo-input.has-memo { color: var(--text-primary); font-weight: 500; }
   .memo-input { width: 100%; font-size: 12px; color: var(--text-secondary); border: none; border-top: 0.5px solid var(--border); background: transparent; outline: none; padding: 3px 2px 1px; font-family: inherit; resize: none; min-height: 20px; line-height: 1.4; text-align: center; overflow: hidden; }
   .memo-input::placeholder { color: var(--text-tertiary); font-size: 11px; }
-  .memo-input:not(.editable) { pointer-events: none; }
   .memo-input.editable { cursor: text; }
   .memo-input.editable:focus { background: var(--bg-secondary); border-radius: 2px; }
   .memo-input.has-memo { color: var(--text-primary); font-weight: 500; }
