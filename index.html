@@ -181,7 +181,6 @@
   .sns-memo-input.has-memo { color: var(--text-primary); font-weight: 500; }
   .memo-input { width: 100%; font-size: 12px; color: var(--text-secondary); border: none; border-top: 0.5px solid var(--border); background: transparent; outline: none; padding: 3px 2px 1px; font-family: inherit; resize: none; min-height: 20px; line-height: 1.4; text-align: center; overflow: hidden; }
   .memo-input::placeholder { color: var(--text-tertiary); font-size: 11px; }
-  .memo-input:disabled, .sns-memo-input:disabled, .label-note:disabled { opacity: 1; background: transparent; -webkit-text-fill-color: inherit; }
   .memo-input:not(.editable) { pointer-events: none; }
   .memo-input.editable { cursor: text; }
   .memo-input.editable:focus { background: var(--bg-secondary); border-radius: 2px; }
@@ -413,16 +412,21 @@ function makeMemo(task,dk,type){
   const memoKey=type==='v'?'vmemos':'smemos';
   if(!task[memoKey])task[memoKey]={};
   const val=task[memoKey][dk]||'';
-  const el=document.createElement('textarea');
-  el.className='memo-input'+(val?' has-memo':'');
-  el.placeholder='메모';
-  el.value=val;el.rows=1;
-  el.disabled=!isEditMode;
-  el.style.cursor=isEditMode?'text':'default';
-  el.style.opacity=isEditMode?'1':'1';
-  el.addEventListener('input',()=>{el.style.height='auto';el.style.height=el.scrollHeight+'px';el.className='memo-input'+(el.value?' has-memo':'');});
-  el.addEventListener('change',()=>{task[memoKey][dk]=el.value;saveToFirebase();});
-  return el;
+  if(isEditMode){
+    const el=document.createElement('textarea');
+    el.className='memo-input'+(val?' has-memo':'');
+    el.placeholder='메모';
+    el.value=val;el.rows=1;
+    el.addEventListener('input',()=>{el.style.height='auto';el.style.height=el.scrollHeight+'px';el.className='memo-input'+(el.value?' has-memo':'');});
+    el.addEventListener('change',()=>{task[memoKey][dk]=el.value;saveToFirebase();});
+    return el;
+  } else {
+    const el=document.createElement('div');
+    el.className='memo-input'+(val?' has-memo':'');
+    el.style.cursor='default';
+    el.textContent=val||'';
+    return el;
+  }
 }
 
 // SNS 아이콘 3개 생성
@@ -467,16 +471,24 @@ function makeSnsRow(task, dk){
     // 메모 입력칸
     const inp=document.createElement('input');
     inp.type='text';
-    inp.className='sns-memo-input'+(memoVal?' has-memo':'');
-    inp.placeholder=title+' 메모';
-    inp.value=memoVal;
-    inp.disabled=!isEditMode;
-    inp.addEventListener('change',()=>{
-      if(!task.snsmemos[dk])task.snsmemos[dk]={};
-      task.snsmemos[dk][key]=inp.value;
-      inp.className='sns-memo-input'+(inp.value?' has-memo':'');
-      saveToFirebase();
-    });
+    if(isEditMode){
+      inp.className='sns-memo-input'+(memoVal?' has-memo':'');
+      inp.placeholder=title+' 메모';
+      inp.value=memoVal;
+      inp.addEventListener('change',()=>{
+        if(!task.snsmemos[dk])task.snsmemos[dk]={};
+        task.snsmemos[dk][key]=inp.value;
+        inp.className='sns-memo-input'+(inp.value?' has-memo':'');
+        saveToFirebase();
+      });
+    } else {
+      inp.className='sns-memo-input'+(memoVal?' has-memo':'');
+      inp.value=memoVal;
+      inp.readOnly=true;
+      inp.style.cursor='default';
+      inp.tabIndex=-1;
+      inp.style.userSelect='none';
+    }
 
     row.appendChild(btn);
     row.appendChild(inp);
@@ -569,7 +581,7 @@ function render(){
       noteEl.placeholder='업로드 시간, 메모 등';
       noteEl.value=task.labelnote||'';
       noteEl.rows=1;
-      noteEl.disabled=!isEditMode;
+      if(!isEditMode){noteEl.readOnly=true;noteEl.style.cursor='default';noteEl.tabIndex=-1;}
       noteEl.addEventListener('input',()=>{
         noteEl.style.height='auto';
         noteEl.style.height=noteEl.scrollHeight+'px';
