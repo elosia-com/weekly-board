@@ -413,6 +413,7 @@ function makeMemo(task,dk,type){
   el.addEventListener('input',()=>{el.style.height='auto';el.style.height=el.scrollHeight+'px';el.className='memo-input'+(el.value?' has-memo':'')+(isEditMode?' editable':'');});
   el.addEventListener('change',()=>{if(isEditMode){task[memoKey][dk]=el.value;saveToFirebase();}});
   return el;
+  el.addEventListener("mousedown",()=>{if(isEditMode){el.readOnly=false;el.focus();}});
 }
 
 // SNS 아이콘 3개 생성
@@ -462,6 +463,7 @@ function makeSnsRow(task, dk){
     inp.value=memoVal;
     inp.readOnly=!isEditMode;
     inp.addEventListener('change',()=>{
+    inp.addEventListener("mousedown",()=>{if(isEditMode){inp.readOnly=false;inp.focus();}});
       if(isEditMode){
         if(!task.snsmemos[dk])task.snsmemos[dk]={};
         task.snsmemos[dk][key]=inp.value;
@@ -469,6 +471,7 @@ function makeSnsRow(task, dk){
         saveToFirebase();
       }
     });
+    inp.addEventListener('mousedown',()=>{if(isEditMode)setTimeout(()=>inp.focus(),0);});
 
     row.appendChild(btn);
     row.appendChild(inp);
@@ -568,6 +571,8 @@ function render(){
         noteEl.className='label-note'+(noteEl.value?' has-note':'');
       });
       noteEl.addEventListener('change',()=>{if(isEditMode){task.labelnote=noteEl.value;saveToFirebase();}});
+      noteEl.addEventListener("mousedown",()=>{if(isEditMode){noteEl.readOnly=false;noteEl.focus();}});
+      noteEl.addEventListener('mousedown',()=>{if(isEditMode)setTimeout(()=>noteEl.focus(),0);});
       labelCell.appendChild(noteEl);
       // 초기 높이 세팅 (이미 내용 있을 때)
       requestAnimationFrame(()=>{
