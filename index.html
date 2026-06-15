@@ -330,7 +330,11 @@ onValue(dbRef,(snapshot)=>{
   setSyncStatus(true);
   if(snapshot.exists()){state=snapshot.val();}
   else{set(dbRef,DEFAULT_STATE);state=JSON.parse(JSON.stringify(DEFAULT_STATE));}
-  if(document.getElementById('app').classList.contains('visible')){render();}
+  if(document.getElementById('app').classList.contains('visible')){
+    const active=document.activeElement;
+    const isFocused=active&&(active.tagName==='TEXTAREA'||active.tagName==='INPUT')&&active.closest('#board');
+    if(!isFocused)render();
+  }
 },()=>{setSyncStatus(false);});
 
 document.getElementById('btn-view').addEventListener('click',()=>{isEditMode=false;showApp();});
