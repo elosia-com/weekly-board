@@ -413,10 +413,11 @@ function makeMemo(task,dk,type){
   if(!task[memoKey])task[memoKey]={};
   const val=task[memoKey][dk]||'';
   const el=document.createElement('textarea');
-  el.className='memo-input'+(val?' has-memo':'')+(isEditMode?' editable':'');
+  el.className='memo-input'+(val?' has-memo':'');
   el.placeholder=isEditMode?'메모':'';
   el.value=val;el.rows=1;
-  el.addEventListener('input',()=>{el.style.height='auto';el.style.height=el.scrollHeight+'px';el.className='memo-input'+(el.value?' has-memo':'')+(isEditMode?' editable':'');});
+  if(!isEditMode){el.style.pointerEvents='none';el.tabIndex=-1;}
+  el.addEventListener('input',()=>{el.style.height='auto';el.style.height=el.scrollHeight+'px';el.className='memo-input'+(el.value?' has-memo':'');});
   el.addEventListener('change',()=>{if(isEditMode){task[memoKey][dk]=el.value;saveToFirebase();}});
   return el;
 }
@@ -463,9 +464,10 @@ function makeSnsRow(task, dk){
     // 메모 입력칸
     const inp=document.createElement('input');
     inp.type='text';
-    inp.className='sns-memo-input'+(memoVal?' has-memo':'')+(isEditMode?' editable':'');
+    inp.className='sns-memo-input'+(memoVal?' has-memo':'');
     inp.placeholder=isEditMode?title+' 메모':'';
     inp.value=memoVal;
+    if(!isEditMode){inp.style.pointerEvents='none';inp.tabIndex=-1;}
     inp.addEventListener('change',()=>{
       if(isEditMode){
         if(!task.snsmemos[dk])task.snsmemos[dk]={};
@@ -562,10 +564,11 @@ function render(){
       // 하단 메모 (업로드 시간 등)
       if(!task.labelnote) task.labelnote='';
       const noteEl=document.createElement('textarea');
-      noteEl.className='label-note'+(task.labelnote?' has-note':'')+(isEditMode?' editable':'');
+      noteEl.className='label-note'+(task.labelnote?' has-note':'');
       noteEl.placeholder=isEditMode?'업로드 시간, 메모 등':'';
       noteEl.value=task.labelnote||'';
       noteEl.rows=1;
+      if(!isEditMode){noteEl.style.pointerEvents='none';noteEl.tabIndex=-1;}
       noteEl.addEventListener('input',()=>{
         noteEl.style.height='auto';
         noteEl.style.height=noteEl.scrollHeight+'px';
